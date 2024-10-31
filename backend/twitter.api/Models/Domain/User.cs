@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace twitter.api.Models.Domain
 {
@@ -30,10 +31,13 @@ namespace twitter.api.Models.Domain
         public string? CoverImg { get; set; }
 
         [MaxLength(280)]
-        public string? Bio { get; set; } 
+        public string? Bio { get; set; }
+
+        [Url]
         public string? Link { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+        public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+
     }
 }

@@ -62,6 +62,7 @@ namespace twitter.api.CustomValidation
 
                 // Attach user to HttpContext for use in controllers
                 httpContext.Items["User"] = user;
+                httpContext.Items["UserId"] = userId;
             }
             catch (SecurityTokenException)
             {
