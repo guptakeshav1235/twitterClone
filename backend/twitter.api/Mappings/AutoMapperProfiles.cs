@@ -9,7 +9,12 @@ namespace twitter.api.Mappings
         public AutoMapperProfiles()
         {
             CreateMap<UserRegisterDto, User>().ReverseMap();
-            CreateMap<User,UserResponseDto>().ReverseMap();
+            CreateMap<User, UserResponseDto>().ReverseMap();
+            CreateMap<User, UserProfileDto>().ReverseMap();
+
+            CreateMap<User, BasicUserInfoDto>().ReverseMap();
+            CreateMap<User, SuggestedUserDto>().ReverseMap();
+            CreateMap<User, UpdateUserResponseDto>().ReverseMap();
         }
     }
 }
