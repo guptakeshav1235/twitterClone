@@ -1,4 +1,6 @@
-﻿namespace twitter.api.Models.DTO
+﻿using twitter.api.Models.Domain;
+
+namespace twitter.api.Models.DTO
 {
     public class BasicUserInfoDto
     {

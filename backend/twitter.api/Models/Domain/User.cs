@@ -36,6 +36,8 @@ namespace twitter.api.Models.Domain
         [Url]
         public string? Link { get; set; }
 
+        public ICollection<Post> LikedPost { get; set; } = new List<Post>();
+
         public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
         public DateTime UpdatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
 
