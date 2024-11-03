@@ -28,6 +28,8 @@ namespace twitter.api.Mappings
             CreateMap<Comment, CommentDetailDto>().
                 ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ReverseMap();
+
+            CreateMap<Notification, NotificationDto>().ReverseMap();
         }
     }
 }
