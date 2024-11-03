@@ -12,7 +12,7 @@ namespace twitter.api.Models.DTO
         public string? Text { get; set; }
 
         public string? Img { get; set; }
-        public ICollection<User> Likes { get; set; } = new List<User>();
+        public ICollection<BasicUserInfoDto> Likes { get; set; } = new List<BasicUserInfoDto>();
 
         public ICollection<CommentDetailDto> Comments { get; set; } = new List<CommentDetailDto>();
 

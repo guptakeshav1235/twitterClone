@@ -10,6 +10,7 @@ namespace twitter.api.Repositories
         Task DeletePostAsync(Post post);
         Task CommentOnPost(Post post, Comment comment);
         Task LikeUnlikePostAsync(Post post, Guid userId, bool isLike);
-        Task<List<Post>> GetLikedPostsAsync(Guid userId);
+        Task<IEnumerable<Post>> GetFollowingPostAsync(Guid userId);
+        Task<IEnumerable<Post>> GetUserPostsAsync(string username);
     }
 }

@@ -79,17 +79,41 @@ namespace twitter.api.Repositories
             }
         }
 
-        public async Task<List<Post>> GetLikedPostsAsync(Guid userId)
+        public async Task<IEnumerable<Post>> GetFollowingPostAsync(Guid userId)
         {
             var user = await dbContext.Users
-                       .Include(u => u.LikedPost)
-                           .ThenInclude(post => post.User)
-                       .Include(u => u.LikedPost)
-                           .ThenInclude(post => post.Comments)
-                               .ThenInclude(comment => comment.User)
-                       .FirstOrDefaultAsync(u => u.Id == userId);
+                .Include(x => x.Following)
+                .FirstOrDefaultAsync(x => x.Id == userId);
 
-            return user?.LikedPost.ToList() ?? new List<Post>();
+            if (user == null || !user.Following.Any())
+                return new List<Post>();
+
+            var followingIds=user.Following.Select(x=>x.Id).ToList();
+
+            var feedPosts=await dbContext.Posts
+                .Where(p=>followingIds.Contains(p.UserId))
+                .Include(p=>p.User)
+                .Include(p=>p.Comments).ThenInclude(c=>c.User)
+                .OrderByDescending(p=>p.CreatedAt)
+                .ToListAsync();
+
+            return feedPosts;
+        }
+
+        public async Task<IEnumerable<Post>> GetUserPostsAsync(string username)
+        {
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+            if(user==null)
+                return new List<Post>();
+
+            var posts= await dbContext.Posts
+                .Where(p => p.UserId==user.Id)
+                .Include(p => p.User)
+                .Include(p => p.Comments).ThenInclude(c => c.User)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            return posts;
         }
     }
 }

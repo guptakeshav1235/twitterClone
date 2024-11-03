@@ -149,17 +149,32 @@ namespace twitter.api.Controllers
         }
 
         [HttpGet]
-        [Route("likes/{id:Guid}")]
-        public async Task<IActionResult> GetLikedPosts([FromRoute] Guid id)
+        [Route("following")]
+        public async Task<IActionResult> GetFollowingPost()
         {
-            var likedPosts = postRepository.GetLikedPostsAsync(id);
+            var userId = HttpContext.Items["UserId"]as string;
 
-            if(likedPosts == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return NotFound(new { error = "User not found or no liked posts" });
+                return Unauthorized("Unauthorized: Invalid or expired token");
+            }
+            
+            var feedPosts=await postRepository.GetFollowingPostAsync(Guid.Parse(userId));
+            return Ok(mapper.Map<List<PostDto>>(feedPosts));
+
+        }
+
+        [HttpGet]
+        [Route("user/{username}")]
+        public async Task<IActionResult> GetUserPosts([FromRoute] string username)
+        {
+            var posts=await postRepository.GetUserPostsAsync(username);
+            if (!posts.Any())
+            {
+                return NotFound(new { error = "User not found or no posts available" });
             }
 
-            return Ok(mapper.Map<List<PostDto>>(likedPosts));
+            return Ok(mapper.Map<List<PostDto>>(posts));
         }
 
     }
