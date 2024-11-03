@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using twitter.api.Data;
 
@@ -11,9 +12,11 @@ using twitter.api.Data;
 namespace twitter.api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241101073707_Add Posts and Comments Table")]
+    partial class AddPostsandCommentsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace twitter.api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("PostUser", b =>
-                {
-                    b.Property<Guid>("LikedPostId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("LikesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("LikedPostId", "LikesId");
-
-                    b.HasIndex("LikesId");
-
-                    b.ToTable("UserPostLikes", (string)null);
-                });
 
             modelBuilder.Entity("UserUser", b =>
                 {
@@ -176,6 +164,9 @@ namespace twitter.api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ProfileImg")
                         .HasColumnType("nvarchar(max)");
 
@@ -189,22 +180,9 @@ namespace twitter.api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PostId");
+
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("PostUser", b =>
-                {
-                    b.HasOne("twitter.api.Models.Domain.Post", null)
-                        .WithMany()
-                        .HasForeignKey("LikedPostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("twitter.api.Models.Domain.User", null)
-                        .WithMany()
-                        .HasForeignKey("LikesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("UserUser", b =>
@@ -265,15 +243,24 @@ namespace twitter.api.Migrations
                     b.HasOne("twitter.api.Models.Domain.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("twitter.api.Models.Domain.User", b =>
+                {
+                    b.HasOne("twitter.api.Models.Domain.Post", null)
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId");
+                });
+
             modelBuilder.Entity("twitter.api.Models.Domain.Post", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

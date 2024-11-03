@@ -29,6 +29,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<ICloudinaryRepository, CloudinaryRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
 
 builder.Services.AddScoped<ProtectRouteAttribute>();
 
