@@ -8,11 +8,19 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
+import { formatPostDate } from "../../utils/date";
 
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const { data: authUser } = useQuery({ queryKey: ["authUser"] });
     const queryClient = useQueryClient();
+
+    const postOwner = post.user;
+    const isLiked = post.likes.includes(authUser.id);
+
+    const isMyPost = authUser.id === post.user.id;
+
+    const formattedDate = formatPostDate(post.createdAt);
 
     const { mutate: deletePost, isPending: isDeleting } = useMutation({
         mutationFn: async () => {
@@ -69,17 +77,43 @@ const Post = ({ post }) => {
                 });
             });
         }
-    })
+    });
 
-    const postOwner = post.user;
-    const isLiked = post.likes.includes(authUser.id);
-    // const isLiked = post.likes.some(like => like.id === authUser.id);
+    const { mutate: commentPost, isPending: isCommenting } = useMutation({
+        mutationFn: async () => {
+            try {
+                const res = await fetch(`/api/posts/comment/${post.id}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ text: comment }),
+                    credentials: "include",
+                })
 
-    const isMyPost = authUser.id === post.user.id;
-
-    const formattedDate = "1h";
-
-    const isCommenting = false;
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Something went wrong");
+                return data;
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        },
+        onSuccess: (updatedComments) => {
+            toast.success("Post commented successfully");
+            setComment("");
+            // queryClient.invalidateQueries({ queryKey: ["posts"] });
+            queryClient.setQueryData(["posts"], (oldData) => {
+                if (!oldData) return [];
+                return oldData.map((p) => {
+                    if (p.id === post.id) {
+                        return { ...p, comments: updatedComments.comments || updatedComments };
+                    }
+                    return p;
+                });
+            });
+        }
+    });
 
     const handleDeletePost = () => {
         deletePost();
@@ -87,6 +121,8 @@ const Post = ({ post }) => {
 
     const handlePostComment = (e) => {
         e.preventDefault();
+        if (isCommenting) return;
+        commentPost();
     };
 
     const handleLikePost = () => {
@@ -138,7 +174,7 @@ const Post = ({ post }) => {
                         <div className='flex gap-4 items-center w-2/3 justify-between'>
                             <div
                                 className='flex gap-1 items-center cursor-pointer group'
-                                onClick={() => document.getElementById("comments_modal" + post._id).showModal()}
+                                onClick={() => document.getElementById("comments_modal" + post.id).showModal()}
                             >
                                 <FaRegComment className='w-4 h-4  text-slate-500 group-hover:text-sky-400' />
                                 <span className='text-sm text-slate-500 group-hover:text-sky-400'>
@@ -146,7 +182,7 @@ const Post = ({ post }) => {
                                 </span>
                             </div>
                             {/* We're using Modal Component from DaisyUI */}
-                            <dialog id={`comments_modal${post._id}`} className='modal border-none outline-none'>
+                            <dialog id={`comments_modal${post.id}`} className='modal border-none outline-none'>
                                 <div className='modal-box rounded border border-gray-600'>
                                     <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
                                     <div className='flex flex-col gap-3 max-h-60 overflow-auto'>
