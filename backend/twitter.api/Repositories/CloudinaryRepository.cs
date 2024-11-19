@@ -24,14 +24,26 @@ namespace twitter.api.Repositories
 
         public async Task<string?> UploadImageAsync(string base64Image)
         {
-            var uploadParams = new ImageUploadParams
-            {
-                File = new FileDescription(base64Image),
-                Transformation = new Transformation().Quality("auto").FetchFormat("auto")
-            };
+            // Remove the data:image/jpeg;base64, prefix if it exists
+            var base64Data = base64Image.Contains(",")
+                ? base64Image.Substring(base64Image.IndexOf(",") + 1)
+                : base64Image;
 
-            var uploadResult = cloudinary.Upload(uploadParams);
-            return uploadResult?.SecureUri?.ToString();
+            // Convert base64 string to byte array
+            byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+            using (var memoryStream = new MemoryStream(imageBytes))
+            {
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription("image.jpg", memoryStream), // Use a memory stream here
+                    Transformation = new Transformation().Quality("auto").FetchFormat("auto")
+                };
+
+                var uploadResult = cloudinary.Upload(uploadParams);
+
+                return uploadResult?.SecureUri?.ToString();
+            }
         }
     }
 }

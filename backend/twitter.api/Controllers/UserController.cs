@@ -48,16 +48,16 @@ namespace twitter.api.Controllers
             var currentuserId = HttpContext.Items["UserId"] as string;
 
             if (string.IsNullOrEmpty(currentuserId))
-                return Unauthorized("User ID not found in token.");
+                return Unauthorized(new { message = "User ID not found in token." });
 
             var resultMessage = await userRepository.FollowUnfollowUserAsync(id, Guid.Parse(currentuserId));
 
             if (resultMessage.Contains("can't follow") || resultMessage.Contains("User not found"))
             {
-                return BadRequest(resultMessage);
+                return BadRequest(new { message = resultMessage });
             }
 
-            return Ok(resultMessage);
+            return Ok(new { message = resultMessage });
         }
 
         [HttpGet]
@@ -126,6 +126,10 @@ namespace twitter.api.Controllers
                 if (!isMatch)
                 {
                     return BadRequest(new { error = "Current password is incorrect" });
+                }
+                if (updateUserDto.NewPassword.Length < 6)
+                {
+                    return BadRequest(new { error = "New Password must be at least 6 characters long" });
                 }
 
                 user.Password = BCrypt.Net.BCrypt.HashPassword(updateUserDto.NewPassword, 10);

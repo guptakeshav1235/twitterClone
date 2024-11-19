@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Linq;
 using twitter.api.CustomValidation;
 using twitter.api.Models.Domain;
@@ -42,7 +43,7 @@ namespace twitter.api.Controllers
 
             if (string.IsNullOrEmpty(createPostDto.Text) && string.IsNullOrEmpty(createPostDto.Img))
             {
-                return BadRequest(new { error = "Post musthave text or image" });
+                return BadRequest(new { error = "Post must have text or image" });
             }
 
             if (!string.IsNullOrEmpty(createPostDto.Img))
@@ -90,8 +91,7 @@ namespace twitter.api.Controllers
             }
 
             await postRepository.DeletePostAsync(post);
-
-            return Ok("Post deleted successfully");
+            return Ok(new { message = "Post deleted successfully" });
         }
 
         [HttpPost]
@@ -132,20 +132,24 @@ namespace twitter.api.Controllers
                 return BadRequest(new { error = "Post not found" });
             }
 
-            var userLikedPost = post.Likes.Select(user => userId).Contains(userId);
+            //var userLikedPost = post.Likes.Select(user => userId).Contains(userId);
+            var userLikedPost = post.Likes.Any(user => user.Id == userId);
 
             if (userLikedPost)
             {
                 //Unlike Post
                 await postRepository.LikeUnlikePostAsync(post, userId, isLike: false);
-                return Ok(new { message = "Post unliked successfully" });
+                //return Ok(new { message = "Post unliked successfully" });
             }
             else
             {
                 //Like Post
                 await postRepository.LikeUnlikePostAsync(post, userId, isLike: true);
-                return Ok(new { message = "Post liked successfully" });
+                //return Ok(new { message = "Post liked successfully" });
             }
+            // Return the updated post data with likes array
+            var updatedPost = await postRepository.GetPostByIdAsync(id);
+            return Ok(mapper.Map<PostResponseDto>(post)); // Ensure this returns the complete post including likes
         }
 
         [HttpGet]
@@ -169,12 +173,21 @@ namespace twitter.api.Controllers
         public async Task<IActionResult> GetUserPosts([FromRoute] string username)
         {
             var posts=await postRepository.GetUserPostsAsync(username);
-            if (!posts.Any())
+            return Ok(mapper.Map<List<PostDto>>(posts));
+        }
+
+        [HttpGet]
+        [Route("likes/{id:Guid}")]
+        public async Task<IActionResult> GetLikedPost([FromRoute] Guid id)
+        {
+            var user = await postRepository.GetUserByIdAsync(id);
+            if (user == null)
             {
-                return NotFound(new { error = "User not found or no posts available" });
+                return NotFound(new { error = "User not found" });
             }
 
-            return Ok(mapper.Map<List<PostDto>>(posts));
+            var likedPosts = await postRepository.GetPostsByIdsAsync(user.LikedPost.Select(p => p.Id));
+            return Ok(mapper.Map<List<PostDto>>(likedPosts));
         }
 
     }

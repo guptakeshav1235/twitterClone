@@ -47,6 +47,11 @@ namespace twitter.api.Controllers
                 return BadRequest(new { error = "Email is already taken" });
             }
 
+            if (userRegisterDto.Password.Length < 6)
+            {
+                return BadRequest(new { error = "Password must be at least 6 characters long" });
+            }
+
             //Hash Paswword
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegisterDto.Password, 10);
 
@@ -75,7 +80,7 @@ namespace twitter.api.Controllers
         [Route("login")]
         public async Task<IActionResult> login([FromBody] UserLoginDto userLoginDto)
         {
-            var user = await userRepository.GetUserByUsernameFollowerFollowingAsync(userLoginDto.Username);
+            var user = await userRepository.GetUserByUsernameAsync(userLoginDto.Username);
             if(user==null || !BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.Password))
             {
                 return BadRequest(new { error = "Invalid username or password" });
@@ -84,26 +89,8 @@ namespace twitter.api.Controllers
             // Generate Token and Set Cookie
             tokenRepository.GenerateTokenAndSetCookie(user.Id, Response);
 
-            // Populate Followers and Following with user details
-            var followers = await userRepository.GetUsersByIdsAsync(user.Followers.Select(f => f.Id).ToList());
-            var following = await userRepository.GetUsersByIdsAsync(user.Following.Select(f => f.Id).ToList());
-
-            var followersDto = followers.Select(f => new BasicUserInfoDto
-            {
-                Id = f.Id,
-                Username = f.Username
-            }).ToList();
-
-            var followingDto = following.Select(f => new BasicUserInfoDto
-            {
-                Id = f.Id,
-                Username = f.Username
-            }).ToList();
-
             //Map Domain Model to Dto
             var userDto = mapper.Map<UserResponseDto>(user);
-            userDto.Followers = followersDto;
-            userDto.Following = followingDto;
 
             return Ok(userDto);
         }
@@ -121,7 +108,9 @@ namespace twitter.api.Controllers
         [ServiceFilter(typeof(ProtectRouteAttribute))]
         public async Task<IActionResult> GetMe()
         {
-            var user = HttpContext.Items["User"] as User;
+            //var user = HttpContext.Items["User"] as User;
+            var userId = Guid.Parse(HttpContext.Items["UserId"] as string);
+            var user = await userRepository.GetUserWithLikesAsync(userId);
             if (user == null)
             {
                 return Unauthorized("Unauthorized: Invalid or expired token");

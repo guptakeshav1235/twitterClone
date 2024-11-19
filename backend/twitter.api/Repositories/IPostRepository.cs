@@ -12,5 +12,7 @@ namespace twitter.api.Repositories
         Task LikeUnlikePostAsync(Post post, Guid userId, bool isLike);
         Task<IEnumerable<Post>> GetFollowingPostAsync(Guid userId);
         Task<IEnumerable<Post>> GetUserPostsAsync(string username);
+        Task<User> GetUserByIdAsync(Guid userId);
+        Task<IEnumerable<Post>> GetPostsByIdsAsync(IEnumerable<Guid> postIds);
     }
 }

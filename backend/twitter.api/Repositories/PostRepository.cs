@@ -26,6 +26,7 @@ namespace twitter.api.Repositories
                         .Include(x => x.User)
                         .Include(x => x.Comments)
                             .ThenInclude(x => x.User)
+                    .Include(x => x.Likes)            // Include the likes on the post
                         .OrderByDescending(x => x.CreatedAt)
                         .ToListAsync();
         }
@@ -94,6 +95,7 @@ namespace twitter.api.Repositories
                 .Where(p=>followingIds.Contains(p.UserId))
                 .Include(p=>p.User)
                 .Include(p=>p.Comments).ThenInclude(c=>c.User)
+                .Include(p=>p.Likes)
                 .OrderByDescending(p=>p.CreatedAt)
                 .ToListAsync();
 
@@ -106,14 +108,28 @@ namespace twitter.api.Repositories
             if(user==null)
                 return new List<Post>();
 
-            var posts= await dbContext.Posts
+            return await dbContext.Posts
                 .Where(p => p.UserId==user.Id)
                 .Include(p => p.User)
                 .Include(p => p.Comments).ThenInclude(c => c.User)
+                .Include(p=>p.Likes)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
-
-            return posts;
+        }
+        public async Task<User> GetUserByIdAsync(Guid userId)
+        {
+            return await dbContext.Users
+                .Include(u => u.LikedPost)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+        public async Task<IEnumerable<Post>> GetPostsByIdsAsync(IEnumerable<Guid> postIds)
+        {
+            return await dbContext.Posts
+                .Where(p => postIds.Contains(p.Id))
+                .Include(p => p.User) // Include the post's user
+                .Include(p => p.Comments)
+                .ThenInclude(c => c.User) // Include the user in comments
+                .ToListAsync();
         }
     }
 }

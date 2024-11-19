@@ -33,7 +33,6 @@ namespace twitter.api.Models.Domain
         [MaxLength(280)]
         public string? Bio { get; set; }
 
-        [Url]
         public string? Link { get; set; }
 
         public ICollection<Post> LikedPost { get; set; } = new List<Post>();
