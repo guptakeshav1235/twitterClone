@@ -112,6 +112,9 @@ const Post = ({ post }) => {
                     return p;
                 });
             });
+        },
+        onError: (error) => {
+            toast.error(error.message);
         }
     });
 
