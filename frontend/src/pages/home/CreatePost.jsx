@@ -14,7 +14,7 @@ const CreatePost = () => {
     const { data: authUser } = useQuery({ queryKey: ["authUser"] });
     const queryClient = useQueryClient();
 
-    const { mutate: createPost, isPending, isError, error } = useMutation({
+    const { mutate: createPost, isPending } = useMutation({
         mutationFn: async ({ text, img }) => {
             try {
                 const res = await fetch('/api/posts/create', {
@@ -39,13 +39,11 @@ const CreatePost = () => {
             setImg(null);
             toast.success("Post created successfully");
             queryClient.invalidateQueries({ queryKey: ["posts"] });
+        },
+        onError: (error) => {
+            toast.error(error.message);
         }
     });
-
-
-    const data = {
-        profileImg: "/avatars/boy1.png",
-    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -103,7 +101,6 @@ const CreatePost = () => {
                         {isPending ? "Posting..." : "Post"}
                     </button>
                 </div>
-                {isError && <div className='text-red-500'>{error.message}</div>}
             </form>
         </div>
     );

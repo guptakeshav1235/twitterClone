@@ -7,10 +7,11 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
+    const queryClient = useQueryClient();
     const [formData, setFormData] = useState({
         email: "",
         username: "",
@@ -18,7 +19,7 @@ const SignUpPage = () => {
         password: "",
     });
 
-    const { mutate, isError, isPending, error } = useMutation({
+    const { mutate, isPending } = useMutation({
         mutationFn: async ({ email, username, fullName, password }) => {
             try {
                 const res = await fetch("/api/auth/signup", {
@@ -27,11 +28,12 @@ const SignUpPage = () => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({ email, username, fullName, password }),
+                    credentials: "include"
                 });
 
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || "failed to create account");
-                console.log(data);
+                // console.log(data);
                 return data;
             } catch (error) {
                 console.error(error);
@@ -40,20 +42,22 @@ const SignUpPage = () => {
         },
         onSuccess: () => {
             toast.success("Account created successfully");
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+        },
+        onError: (error) => {
+            toast.error(error.message);
         }
     })
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(formData);
+        // console.log(formData);
         mutate(formData);
     };
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
-
-    // const isError = false;
 
     return (
         <div className='max-w-screen-xl mx-auto flex h-screen px-10'>
@@ -73,6 +77,7 @@ const SignUpPage = () => {
                             name='email'
                             onChange={handleInputChange}
                             value={formData.email}
+                            required
                         />
                     </label>
                     <div className='flex gap-4 flex-wrap'>
@@ -85,6 +90,7 @@ const SignUpPage = () => {
                                 name='username'
                                 onChange={handleInputChange}
                                 value={formData.username}
+                                required
                             />
                         </label>
                         <label className='input input-bordered rounded flex items-center gap-2 flex-1'>
@@ -96,6 +102,7 @@ const SignUpPage = () => {
                                 name='fullName'
                                 onChange={handleInputChange}
                                 value={formData.fullName}
+                                required
                             />
                         </label>
                     </div>
@@ -108,12 +115,12 @@ const SignUpPage = () => {
                             name='password'
                             onChange={handleInputChange}
                             value={formData.password}
+                            required
                         />
                     </label>
                     <button className='btn rounded-full btn-primary text-white'>
                         {isPending ? "Loading..." : "Sign up"}
                     </button>
-                    {isError && <p className='text-red-500'>{error.message}</p>}
                 </form>
                 <div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
                     <p className='text-white text-lg'>Already have an account?</p>
