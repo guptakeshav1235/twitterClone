@@ -18,6 +18,7 @@ namespace twitter.api.Mappings
 
             CreateMap<Post, CreatePostDto>().ReverseMap();
             CreateMap<Post, PostResponseDto>().ReverseMap();
+            CreateMap<Post, BasicPostInfoDto>().ReverseMap();
 
             CreateMap<Post, PostDto>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))

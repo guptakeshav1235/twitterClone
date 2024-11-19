@@ -14,6 +14,17 @@ namespace twitter.api.Repositories
             this.dbContext = dbContext;
         }
 
+        public async Task<User> GetUserWithLikesAsync(Guid userId)
+        {
+            return await dbContext.Users
+                .Include(u => u.Followers)
+                 .Include(u => u.Following)
+                .Include(u => u.LikedPost) // Ensure the LikedPosts relationship is loaded
+                .ThenInclude(post => post.User) // Include the user data within each liked post
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
+
         public async Task<User> CreateUserAsync(User user)
         {
             await dbContext.Users.AddAsync(user);
@@ -33,15 +44,10 @@ namespace twitter.api.Repositories
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-        }
-
-        public async Task<User> GetUserByUsernameFollowerFollowingAsync(string username)
-        {
             return await dbContext.Users
-                .Include(u => u.Followers) // Include followers
-                .Include(u => u.Following) // Include following
-                .FirstOrDefaultAsync(u => u.Username == username);
+                        .Include(u => u.Followers)
+                        .Include(u => u.Following)
+                        .FirstOrDefaultAsync(x => x.Username == username);
         }
 
         public async Task<IEnumerable<User>> GetUsersByIdsAsync(IEnumerable<Guid> ids)

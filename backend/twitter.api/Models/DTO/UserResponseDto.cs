@@ -12,6 +12,7 @@ namespace twitter.api.Models.DTO
 
         public ICollection<BasicUserInfoDto> Followers { get; set; } = new List<BasicUserInfoDto>();
         public ICollection<BasicUserInfoDto> Following { get; set; } = new List<BasicUserInfoDto>();
+        public ICollection<BasicPostInfoDto> LikedPost { get; set; } = new List<BasicPostInfoDto>();
 
         public string? ProfileImg { get; set; }
         public string? CoverImg { get; set; }

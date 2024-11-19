@@ -7,6 +7,7 @@ namespace twitter.api.Models.DTO
         public Guid Id { get; set; }
         public BasicUserInfoDto User { get; set; }
         public string? Text { get; set; }
+        public string? Img { get; set; }
         public ICollection<BasicUserInfoDto> Likes { get; set; } = new List<BasicUserInfoDto>();
         public ICollection<CommentDetailDto> Comments { get; set; } = new List<CommentDetailDto>();
         public DateTime CreatedAt { get; set; }
