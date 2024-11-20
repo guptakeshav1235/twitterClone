@@ -47,7 +47,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(policy =>
-    policy.WithOrigins("http://localhost:3000")
+    policy.WithOrigins("http://localhost:3000", "https://twitter-clone-plum-beta.vercel.app/")
           .AllowAnyMethod()
           .AllowAnyHeader()
           .AllowCredentials());
