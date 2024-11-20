@@ -47,7 +47,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(policy =>
-    policy.WithOrigins("http://localhost:3000", "https://twitter-clone-plum-beta.vercel.app/")
+    policy.WithOrigins("http://localhost:3000", 
+                        "https://twitter-clone-plum-beta.vercel.app",
+                        "https://twitter-clone-keshav-guptas-projects-1920cd75.vercel.app",
+                        "https://twitter-clone-git-orionmaster-keshav-guptas-projects-1920cd75.vercel.app")
           .AllowAnyMethod()
           .AllowAnyHeader()
           .AllowCredentials());

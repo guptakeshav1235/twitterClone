@@ -14,7 +14,7 @@ const Sidebar = () => {
     const { mutate: logout } = useMutation({
         mutationFn: async () => {
             try {
-                const res = await fetch("/api/auth/logout", {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
                     method: "POST",
                     credentials: "include"
                 });
@@ -27,12 +27,9 @@ const Sidebar = () => {
             }
         },
         onSuccess: () => {
-            document.cookie = "jwt=; Max-Age=0; path=/; domain=localhost; Secure; SameSite=None";
-
             toast.success("User logged-out successfully");
             //refetch the authUser
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
-            window.location.href = "/login";
         },
         onError: () => {
             toast.error("Logout failed");

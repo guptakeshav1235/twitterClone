@@ -30,7 +30,7 @@ const ProfilePage = () => {
         queryKey: ["userProfile", username],
         queryFn: async () => {
             try {
-                const res = await fetch(`/api/users/profile/${username}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile/${username}`, {
                     credentials: "include",
                 });
                 const data = await res.json();
@@ -50,7 +50,7 @@ const ProfilePage = () => {
         queryKey: ["posts"],
         queryFn: async () => {
             try {
-                const res = await fetch(`/api/posts/user/${username}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/posts/user/${username}`, {
                     credentials: "include",
                 });
                 const data = await res.json();
