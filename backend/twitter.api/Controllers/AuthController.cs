@@ -99,7 +99,14 @@ namespace twitter.api.Controllers
         [Route("logout")]
         public async Task<IActionResult> logout()
         {
-            Response.Cookies.Delete("jwt");
+            Response.Cookies.Append("jwt", "", new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddDays(-1), // Set to past date
+                HttpOnly = true,
+                SameSite = SameSiteMode.None,
+                Secure = true,
+                Path = "/" // Ensure this matches the original cookie path
+            });
             return Ok(new { message = "Logged out successfully" });
         }
 

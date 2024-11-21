@@ -30,15 +30,12 @@ namespace twitter.api.Repositories
 
             //Set Cookie
             response.Cookies.Append("jwt", tokenString, new CookieOptions
-            {
-                //MaxAge = TimeSpan.FromHours(1),
-                //HttpOnly = true, //prevent XSS attacks cross - site scripting attacks
-                //SameSite = SameSiteMode.Strict, // CSRF attacks cross-site request forgery attacks
-                //Secure = configuration["ASPNETCORE_ENVIRONMENT"] != "Development"
+            {             
                 MaxAge = TimeSpan.FromHours(1),
                 HttpOnly = true,
                 SameSite = SameSiteMode.None,
                 Secure = true, // Should be true for production with HTTPS
+                Path = "/"
             });
         }
     }
